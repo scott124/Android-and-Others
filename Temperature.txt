@@ -1,0 +1,101 @@
+//接收值判斷
+// The Handler that gets information back from the BluetoothService
+    private final Handler mHandler = new Handler() 
+    {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) 
+            {
+             case MESSAGE_READ:
+    
+    String[] parts = fullString.split(",");
+    
+    if (parts.length == 2)
+    {
+     double mytemp = Double.valueOf(parts[0]);
+     double myph = Double.valueOf(parts[1]);
+     
+     int writedb = 0;
+     
+     s1.setText("水族箱溫度: " + parts[0]);
+     s2.setText("水族箱PH值: " + parts[1]);
+     
+     int strict_temp = 30;
+     int strict_ph = 10;
+     
+     if (!temp.getText().toString().equals(""))
+     {
+      strict_temp = Integer.valueOf(temp.getText().toString());
+     }
+     
+     if (!ph.getText().toString().equals(""))
+     {
+      strict_ph = Integer.valueOf(ph.getText().toString());
+     }
+     
+     if (mytemp > strict_temp)
+     {
+      s3.setText("水族箱溫度異常");
+      s3.setTextColor(Color.RED);
+      playSound();
+      writedb = 1;
+      
+      if (flag == 0)
+      {
+       final int notifyID = 1; // 通知的識別號碼
+       final Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); // 通知音效的URI，在這裡使用系統內建的通知音效
+       final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+       final Notification notification = new Notification.Builder(getApplicationContext()).setSmallIcon(R.drawable.ic_launcher).setContentTitle("水族箱溫度異常").setContentText("水族箱溫度異常").setSound(soundUri).build(); // 建立通知
+       notificationManager.notify(notifyID, notification); // 發送通知
+       flag = 1;
+      }
+      
+     }
+     else
+     {
+      s3.setText("水族箱溫度正常");
+      s3.setTextColor(Color.WHITE);
+      stopSound();
+      
+      flag = 0;
+     }
+     
+     if (myph > strict_ph)
+     {
+      s4.setText("水族箱PH值異常");
+      s4.setTextColor(Color.RED);
+      playSound();
+      writedb = 1;
+      
+      if (flag1 == 0)
+      {
+       final int notifyID = 1; // 通知的識別號碼
+       final Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); // 通知音效的URI，在這裡使用系統內建的通知音效
+       final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+       final Notification notification = new Notification.Builder(getApplicationContext()).setSmallIcon(R.drawable.ic_launcher).setContentTitle("水族箱PH值異常").setContentText("水族箱PH值異常").setSound(soundUri).build(); // 建立通知
+       notificationManager.notify(notifyID, notification); // 發送通知
+       flag1 = 1;
+      }
+     }
+     else
+     {
+      s4.setText("水族箱PH值正常");
+      s4.setTextColor(Color.WHITE);
+      stopSound();
+      flag1 = 0;
+     }
+     
+     Calendar rightNow = Calendar.getInstance();
+     int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
+     
+     if (counter != currentHour || writedb == 1)
+     {
+      rDatabase.inputScore(temp+"", ph+"");
+      counter = currentHour; 
+     }
+    }
+    
+                break;
+            }
+        }
+    };
